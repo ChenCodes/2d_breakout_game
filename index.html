@@ -2,18 +2,61 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Gamedev Phaser Workshop - lesson 01: Initialize the framework</title>
+    <title>Gamedev Phaser Workshop - lesson 04: Move the ball</title>
     <style>* { padding: 0; margin: 0; }</style>
     <script src="js/phaser.min.js"></script>
 </head>
 <body>
 <script>
-    var game = new Phaser.Game(480, 320, Phaser.AUTO, null, {
-      preload: preload, create: create, update: update
-    });
-    function preload() {}
-    function create() {}
-    function update() {}
+var game = new Phaser.Game(480, 320, Phaser.AUTO, null, {preload: preload, create: create, update: update});
+var ball;
+var paddle;
+
+
+function preload() {
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVertically = true;
+    game.stage.backgroundColor = '#eee';
+    game.load.image('ball', 'img/ball.png');
+    game.load.image('paddle', 'img/paddle.png');
+}
+function create() {
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+    ball = game.add.sprite(game.world.width*0.5, game.world.height-25, 'ball');
+    ball.anchor.set(0.5);
+    game.physics.enable(ball, Phaser.Physics.ARCADE);
+    //This will make the ball not move past walls
+    ball.body.collideWorldBounds = true;
+    //This will make it bounce 
+    ball.body.bounce.set(1);
+    ball.body.velocity.set(150, -150);
+    //This line makes it so that the player will lose when the ball makes contact with the bottom of the screen 
+    game.physics.arcade.checkCollision.down = false;
+    ball.checkWorldBounds = true;
+    ball.events.onOutOfBounds.add(function(){
+        alert('Game over!');
+        //The game starts over again 
+        location.reload();
+    }, this);
+
+
+    paddle = game.add.sprite(game.world.width*0.5, game.world.height-5, 'paddle');
+    //This ensures that the anchor of the paddle will be set to the middle of it. 
+    paddle.anchor.set(0.5, 1);
+
+    //instantiates the paddle object within the game, turns on the physics engine for it 
+    game.physics.enable(paddle, Phaser.Physics.ARCADE);
+    //This causes the paddle to not be able to be moved
+    paddle.body.immovable = true;
+
+}
+function update() {
+    //Allows the ball to bounce when it hits the paddle 
+    game.physics.arcade.collide(ball, paddle);
+    //This sets the middle of the screen to be the middle 
+    paddle.x = game.input.x || game.world.width*0.5;
+}
 </script>
 </body>
 </html>
